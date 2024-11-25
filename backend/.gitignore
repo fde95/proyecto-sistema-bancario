@@ -1,0 +1,49 @@
+### IntelliJ IDEA ###
+# Carpetas y archivos de configuración de IntelliJ
+.idea/
+*.iml
+out/
+
+# Excluir compilados, excepto los que están en las carpetas de código fuente
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Eclipse ###
+# Archivos de configuración de Eclipse (puedes quitar esta sección si no usas Eclipse)
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+# Archivos de configuración de NetBeans (puedes quitar esta sección si no usas NetBeans)
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+### VS Code ###
+# Archivos de configuración de Visual Studio Code
+.vscode/
+
+### Sistema Operativo ###
+# Archivos temporales en macOS y Windows
+.DS_Store
+Thumbs.db
+
+### Archivos Java ###
+# Archivos compilados de Java
+*.class
+# Archivos generados de logs
+*.log
+
+### Maven ###
+# Archivos de Maven y directorios de compilación
+target/
