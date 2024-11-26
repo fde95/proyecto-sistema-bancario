@@ -37,7 +37,7 @@ public class CuentaBancaria implements IEntidadBancaria {
         if (cantidad > 0) {
             saldo += cantidad;
             System.out.println("Deposito realizado: $" + cantidad);
-            System.out.println("El saldo de su cuenta es de: $" + saldo);
+            System.out.println("El saldo de su cuenta es de: $" + saldo + "\n");
         } else {
             System.out.println("Cantidad inválida para depositar.");
         }
@@ -47,10 +47,35 @@ public class CuentaBancaria implements IEntidadBancaria {
         if (cantidad > 0 && saldo >= cantidad) {
             saldo -= cantidad;
             System.out.println("Retiro realizado: $" + cantidad);
-            System.out.println("El saldo de su cuenta es de: $" + saldo);
+            System.out.println("El saldo de su cuenta es de: $" + saldo + "\n");
             return true;
         }
         System.out.println("Fondos insuficientes o cantidad inválida.");
         return false;
+    }
+
+    //Getter and Setter
+    public String getNumeroCuenta() {
+        return numeroCuenta;
+    }
+
+    public void setNumeroCuenta(String numeroCuenta) {
+        this.numeroCuenta = numeroCuenta;
+    }
+
+    public String getTitular() {
+        return titular;
+    }
+
+    public void setTitular(String titular) {
+        this.titular = titular;
+    }
+
+    public Double getSaldo() {
+        return saldo;
+    }
+
+    public void setSaldo(Double saldo) {
+        this.saldo = saldo;
     }
 }

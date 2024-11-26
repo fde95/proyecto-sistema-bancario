@@ -1,24 +1,31 @@
 package main.com.fespinoza;
 
-import main.com.fespinoza.interfaces.IEntidadBancaria;
-import main.com.fespinoza.models.CuentaBancaria;
-import main.com.fespinoza.models.Usuario;
+import main.com.fespinoza.services.Banco;
 
 public class Main {
 
     public static void main (String[] args) {
-        //crear un usuario
-        Usuario usuario = new Usuario("Felipe", "Espinoza", "felipe@gmail.com", "123456");
+        Banco banco = new Banco();
 
-        //crear una cuenta bancaria
-        CuentaBancaria cuenta = new CuentaBancaria("001", "Felipe Espinoza", 1000.0);
+        // Crear usuarios
+        banco.crearUsuario("Felipe", "Espinoza", "felipe@gmail.com", "12345");
+        banco.crearUsuario("Juan", "Pérez", "juan@gmail.com", "54321");
 
-        //Polimorfismo: trata ambos como IEntidadBancaria.
-        IEntidadBancaria entidadUsuario = usuario;
-        IEntidadBancaria entidadCuenta = cuenta;
+        // Crear cuentas
+        banco.crearCuenta("felipe@gmail.com", "001", 1000.0);
+        banco.crearCuenta("juan@gmail.com", "002", 500.0);
 
-        //Mostrar información usando los metodos de la interfaz
-        entidadUsuario.mostrarInformacion();
-        entidadCuenta.mostrarInformacion();
+        // Transferir dinero
+        banco.transferir("001", "002", 200.0);
+
+        // Buscar cuentas
+        banco.buscarCuenta("001").mostrarInformacion();
+        banco.buscarCuenta("002").mostrarInformacion();
+
+        // Eliminar usuario
+        banco.eliminarUsuario("juan@gmail.com");
+
+        // Verificar que las cuentas de Juan fueron eliminadas
+        banco.buscarCuenta("002");
     }
 }
