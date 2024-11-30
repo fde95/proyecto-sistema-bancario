@@ -5,6 +5,7 @@ import main.com.fespinoza.models.Usuario;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Clase que gestiona las operaciones bancarias.
@@ -21,94 +22,59 @@ public class Banco {
         this.cuentas = new HashMap<>();
     }
 
-    //Métodos publicos: CRUD y operaciones
+    // Métodos públicos: CRUD y operaciones
     public boolean crearUsuario(String nombre, String apellido, String email, String contrasena) {
+        if (!validarTexto(nombre, "Nombre") || !validarTexto(apellido, "Apellido") ||
+                !validarEmail(email) || !validarTexto(contrasena, "Contraseña")) {
+            return false;
+        }
+
         if (usuarios.containsKey(email)) {
-            System.out.println("\nEl usuario con email " + email + " Ya existe.");
+            System.out.println("Error: El usuario con email " + email + " ya existe.");
             return false;
         }
+
         usuarios.put(email, new Usuario(nombre, apellido, email, contrasena));
-        System.out.println("====================================\n" +
-                "Usuario " + nombre + " " + apellido + " creado con éxito!\n" +
-                "====================================\n");
-        return true;
-    }
-
-    public Usuario buscarUsuario(String email) {
-        return usuarios.get(email);
-    }
-
-    public boolean actualizarUsuario(String email, String nuevoNombre, String nuevoApellido, String nuevaContrasena) {
-        Usuario usuario = buscarUsuarioInterno(email);
-        if (usuario == null) return false;
-
-        if (nuevoNombre != null) usuario.setNombre(nuevoNombre);
-        if (nuevoApellido != null) usuario.setApellido(nuevoApellido);
-        if (nuevaContrasena != null) usuario.setContrasena(nuevaContrasena);
-
-        System.out.println("Usuario " + email + " actualizado con éxito!");
-        return true;
-    }
-
-    public boolean eliminarUsuario(String email) {
-        Usuario usuario = usuarios.remove(email);
-        if (usuario == null) {
-            System.out.println("\nUsuario no encontrao.");
-            return false;
-        }
-        for (CuentaBancaria cuenta : usuario.getCuentas()) {
-            cuentas.remove(cuenta.getIdentificador());
-        }
-        System.out.println("=== Usuario y cuenta asociadas elimindos con éxito! ===\n");
+        System.out.println("Usuario " + nombre + " " + apellido + " creado con éxito!");
         return true;
     }
 
     public boolean crearCuenta(String email, String numeroCuenta, double saldoInicial) {
+        if (!validarTexto(email, "Email") || !validarTexto(numeroCuenta, "Número de Cuenta") ||
+                !validarSaldo(saldoInicial)) {
+            return false;
+        }
+
         Usuario usuario = buscarUsuarioInterno(email);
         if (usuario == null) return false;
 
         if (cuentas.containsKey(numeroCuenta)) {
-            System.out.println("Error: La cuenta con número " + numeroCuenta +" ya existe.");
+            System.out.println("Error: La cuenta con número " + numeroCuenta + " ya existe.");
             return false;
         }
 
         CuentaBancaria cuenta = new CuentaBancaria(numeroCuenta, usuario.getNombre(), saldoInicial);
         cuentas.put(numeroCuenta, cuenta);
         usuario.agregarCuenta(cuenta);
-        System.out.println("====================================\n" +
-                "Cuenta " + numeroCuenta + " creada con éxito para " + usuario.getNombre() + " " + usuario.getApellido() +
-                "\n====================================\n");
-        return true;
-    }
 
-    public CuentaBancaria buscarCuenta(String numeroCuenta) {
-        return cuentas.get(numeroCuenta);
-    }
-
-    public boolean eliminarCuenta(String numeroCuenta) {
-        CuentaBancaria cuenta = buscarCuentaInterna(numeroCuenta);
-        if (cuenta == null) return false;
-
-        cuentas.remove(numeroCuenta);
-
-        Usuario usuario = buscarUsuarioPorTitular(cuenta.getTitular());
-        if (usuario != null) {
-            usuario.getCuentas().removeIf(c -> c.getIdentificador().equals(numeroCuenta));
-        }
-
-        System.out.println("Cuenta " + numeroCuenta + " eliminada con éxito.");
+        System.out.println("Cuenta " + numeroCuenta + " creada con éxito para " + usuario.getNombre());
         return true;
     }
 
     public boolean transferir(String numeroCuentaOrigen, String numeroCuentaDestino, double monto) {
-        CuentaBancaria origen = cuentas.get(numeroCuentaOrigen);
-        CuentaBancaria destino = cuentas.get(numeroCuentaDestino);
+        if (!validarTexto(numeroCuentaOrigen, "Número de Cuenta Origen") ||
+                !validarTexto(numeroCuentaDestino, "Número de Cuenta Destino") || !validarSaldo(monto)) {
+            return false;
+        }
+
+        CuentaBancaria origen = buscarCuentaInterna(numeroCuentaOrigen);
+        CuentaBancaria destino = buscarCuentaInterna(numeroCuentaDestino);
 
         if (origen == null || destino == null) return false;
 
         if (origen.retirar(monto)) {
             destino.depositar(monto);
-            System.out.println("$$$ Transferencia de $" + monto + " realizada con éxito. $$$\n");
+            System.out.println("Transferencia de $" + monto + " realizada con éxito.");
             return true;
         }
 
@@ -116,7 +82,39 @@ public class Banco {
         return false;
     }
 
-    //Metodos privados: Lógica auxiliar
+    // Métodos privados: Validaciones
+    private boolean validarTexto(String texto, String campo) {
+        if (texto == null || texto.trim().isEmpty()) {
+            System.out.println("Error: El campo " + campo + " no puede estar vacío.");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validarEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            System.out.println("Error: El email no puede estar vacío.");
+            return false;
+        }
+
+        // Validar formato de email
+        String regex = "^[\\w-\\.]+@[\\w-\\.]+\\.[a-zA-Z]{2,}$";
+        if (!Pattern.matches(regex, email)) {
+            System.out.println("Error: El email " + email + " tiene un formato inválido.");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validarSaldo(double saldo) {
+        if (saldo < 0) {
+            System.out.println("Error: El saldo no puede ser negativo.");
+            return false;
+        }
+        return true;
+    }
+
+    // Métodos auxiliares de búsqueda (refactorizados previamente)
     private Usuario buscarUsuarioInterno(String email) {
         Usuario usuario = usuarios.get(email);
         if (usuario == null) {
@@ -132,11 +130,4 @@ public class Banco {
         }
         return cuenta;
     }
-
-    private Usuario buscarUsuarioPorTitular(String titular) {
-        return usuarios.values().stream()
-                .filter(usuario -> usuario.getNombre().equals(titular))
-                .findFirst().orElse(null);
-    }
-
 }
