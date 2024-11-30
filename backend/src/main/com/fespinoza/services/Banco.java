@@ -21,7 +21,7 @@ public class Banco {
         this.cuentas = new HashMap<>();
     }
 
-    //Método CRUD y operaciones
+    //Métodos publicos: CRUD y operaciones
     public boolean crearUsuario(String nombre, String apellido, String email, String contrasena) {
         if (usuarios.containsKey(email)) {
             System.out.println("\nEl usuario con email " + email + " Ya existe.");
@@ -39,17 +39,14 @@ public class Banco {
     }
 
     public boolean actualizarUsuario(String email, String nuevoNombre, String nuevoApellido, String nuevaContrasena) {
-        Usuario usuario = usuarios.get(email);
-        if (usuario == null) {
-            System.out.println("\nUsuario no encontrado");
-            return false;
-        }
+        Usuario usuario = buscarUsuarioInterno(email);
+        if (usuario == null) return false;
+
         if (nuevoNombre != null) usuario.setNombre(nuevoNombre);
         if (nuevoApellido != null) usuario.setApellido(nuevoApellido);
         if (nuevaContrasena != null) usuario.setContrasena(nuevaContrasena);
-        System.out.println("====================================\n" +
-                "Usuario " + email + " actualizado con éxito!\n" +
-                "====================================\n");
+
+        System.out.println("Usuario " + email + " actualizado con éxito!");
         return true;
     }
 
@@ -67,15 +64,14 @@ public class Banco {
     }
 
     public boolean crearCuenta(String email, String numeroCuenta, double saldoInicial) {
-        Usuario usuario = usuarios.get(email);
-        if (usuario == null) {
-            System.out.println("Usuario no encontrado.");
-            return false;
-        }
+        Usuario usuario = buscarUsuarioInterno(email);
+        if (usuario == null) return false;
+
         if (cuentas.containsKey(numeroCuenta)) {
-            System.out.println("La cuenta con número " + numeroCuenta + " ya existe.\n");
+            System.out.println("Error: La cuenta con número " + numeroCuenta +" ya existe.");
             return false;
         }
+
         CuentaBancaria cuenta = new CuentaBancaria(numeroCuenta, usuario.getNombre(), saldoInicial);
         cuentas.put(numeroCuenta, cuenta);
         usuario.agregarCuenta(cuenta);
@@ -90,14 +86,17 @@ public class Banco {
     }
 
     public boolean eliminarCuenta(String numeroCuenta) {
-        CuentaBancaria cuenta = cuentas.remove(numeroCuenta);
-        if (cuenta == null) {
-            System.out.println("\n*** Cuenta no encontrada. ***");
-            return false;
+        CuentaBancaria cuenta = buscarCuentaInterna(numeroCuenta);
+        if (cuenta == null) return false;
+
+        cuentas.remove(numeroCuenta);
+
+        Usuario usuario = buscarUsuarioPorTitular(cuenta.getTitular());
+        if (usuario != null) {
+            usuario.getCuentas().removeIf(c -> c.getIdentificador().equals(numeroCuenta));
         }
-        System.out.println("====================================\n" +
-                " Cuenta " + numeroCuenta + " eliminada con éxito." +
-                "====================================\n");
+
+        System.out.println("Cuenta " + numeroCuenta + " eliminada con éxito.");
         return true;
     }
 
@@ -105,10 +104,7 @@ public class Banco {
         CuentaBancaria origen = cuentas.get(numeroCuentaOrigen);
         CuentaBancaria destino = cuentas.get(numeroCuentaDestino);
 
-        if (origen == null || destino == null) {
-            System.out.println("Una o ambas cuentas no existen.");
-            return false;
-        }
+        if (origen == null || destino == null) return false;
 
         if (origen.retirar(monto)) {
             destino.depositar(monto);
@@ -116,7 +112,31 @@ public class Banco {
             return true;
         }
 
-        System.out.println("Transferencia fallida. Verifica los fondos de la cuenta origen.");
+        System.out.println("Error: Transferencia fallida. Fondos insuficientes.");
         return false;
     }
+
+    //Metodos privados: Lógica auxiliar
+    private Usuario buscarUsuarioInterno(String email) {
+        Usuario usuario = usuarios.get(email);
+        if (usuario == null) {
+            System.out.println("Error: Usuario con email " + email + " no encontrado.");
+        }
+        return usuario;
+    }
+
+    private CuentaBancaria buscarCuentaInterna(String numeroCuenta) {
+        CuentaBancaria cuenta = cuentas.get(numeroCuenta);
+        if (cuenta == null) {
+            System.out.println("Error: Cuenta con número " + numeroCuenta + " no encontrada.");
+        }
+        return cuenta;
+    }
+
+    private Usuario buscarUsuarioPorTitular(String titular) {
+        return usuarios.values().stream()
+                .filter(usuario -> usuario.getNombre().equals(titular))
+                .findFirst().orElse(null);
+    }
+
 }
