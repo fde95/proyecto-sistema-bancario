@@ -4,6 +4,7 @@ import main.com.fespinoza.exceptions.SaldoInsuficienteException;
 import main.com.fespinoza.exceptions.UsuarioNoEncontradoException;
 import main.com.fespinoza.exceptions.CuentaNoEncontradaException;
 import main.com.fespinoza.models.CuentaBancaria;
+import main.com.fespinoza.models.Transaccion;
 import main.com.fespinoza.models.Usuario;
 
 import java.util.HashMap;
@@ -78,8 +79,21 @@ public class Banco {
             CuentaBancaria origen = buscarCuentaInterna(numeroCuentaOrigen);
             CuentaBancaria destino = buscarCuentaInterna(numeroCuentaDestino);
 
-            origen.retirar(monto); // Ahora puede lanzar SaldoInsuficienteException
+            // Realizar el retiro en la cuenta origen
+            origen.retirar(monto);
+            origen.agregarTransaccion(new Transaccion(
+                    Transaccion.Tipo.TRANSFERENCIA,
+                    monto,
+                    "Transferencia enviada a la cuenta " + numeroCuentaDestino
+            ));
+
+            // Realizar el depósito en la cuenta destino
             destino.depositar(monto);
+            destino.agregarTransaccion(new Transaccion(
+                    Transaccion.Tipo.TRANSFERENCIA,
+                    monto,
+                    "Transferencia recibida desde la cuenta " + numeroCuentaOrigen
+            ));
 
             System.out.println("Transferencia de $" + monto + " realizada con éxito.");
             return true;
@@ -87,11 +101,12 @@ public class Banco {
         } catch (CuentaNoEncontradaException e) {
             System.out.println(e.getMessage());
         } catch (SaldoInsuficienteException e) {
-            System.out.println(e.getMessage()); // Maneja la excepción de saldo insuficiente
+            System.out.println(e.getMessage());
         }
 
         return false;
     }
+
 
 
     // Métodos privados: Validaciones
