@@ -1,5 +1,6 @@
 package main.com.fespinoza.models;
 
+import main.com.fespinoza.exceptions.SaldoInsuficienteException;
 import main.com.fespinoza.interfaces.IEntidadBancaria;
 
 /**
@@ -43,16 +44,20 @@ public class CuentaBancaria implements IEntidadBancaria {
         }
     }
 
-    public Boolean retirar(Double cantidad) {
-        if (cantidad > 0 && saldo >= cantidad) {
-            saldo -= cantidad;
-            System.out.println("Retiro realizado: $" + cantidad);
-            System.out.println("El saldo de su cuenta es de: $" + saldo + "\n");
-            return true;
+    public void retirar(Double cantidad) throws SaldoInsuficienteException {
+        if (cantidad <= 0) {
+            throw new SaldoInsuficienteException(saldo, cantidad); // Cantidad inválida
         }
-        System.out.println("Fondos insuficientes o cantidad inválida.");
-        return false;
+
+        if (saldo < cantidad) {
+            throw new SaldoInsuficienteException(saldo, cantidad); // Saldo insuficiente
+        }
+
+        saldo -= cantidad;
+        System.out.println("Retiro realizado: $" + cantidad);
+        System.out.println("El saldo de su cuenta es de: $" + saldo + "\n");
     }
+
 
     //Getter and Setter
     public String getNumeroCuenta() {

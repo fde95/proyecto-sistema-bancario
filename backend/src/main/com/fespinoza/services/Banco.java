@@ -1,5 +1,6 @@
 package main.com.fespinoza.services;
 
+import main.com.fespinoza.exceptions.SaldoInsuficienteException;
 import main.com.fespinoza.exceptions.UsuarioNoEncontradoException;
 import main.com.fespinoza.exceptions.CuentaNoEncontradaException;
 import main.com.fespinoza.models.CuentaBancaria;
@@ -68,8 +69,8 @@ public class Banco {
     }
 
     public boolean transferir(String numeroCuentaOrigen, String numeroCuentaDestino, double monto) {
-        if (!validarTexto(numeroCuentaOrigen, "Número de Cuenta Origen") ||
-                !validarTexto(numeroCuentaDestino, "Número de Cuenta Destino") || !validarSaldo(monto)) {
+        if (monto <= 0) {
+            System.out.println("Error: El monto debe ser mayor a 0.");
             return false;
         }
 
@@ -77,20 +78,21 @@ public class Banco {
             CuentaBancaria origen = buscarCuentaInterna(numeroCuentaOrigen);
             CuentaBancaria destino = buscarCuentaInterna(numeroCuentaDestino);
 
-            if (origen.retirar(monto)) {
-                destino.depositar(monto);
-                System.out.println("Transferencia de $" + monto + " realizada con éxito.");
-                return true;
-            }
+            origen.retirar(monto); // Ahora puede lanzar SaldoInsuficienteException
+            destino.depositar(monto);
 
-            System.out.println("Error: Transferencia fallida. Fondos insuficientes.");
-            return false;
+            System.out.println("Transferencia de $" + monto + " realizada con éxito.");
+            return true;
 
         } catch (CuentaNoEncontradaException e) {
             System.out.println(e.getMessage());
-            return false;
+        } catch (SaldoInsuficienteException e) {
+            System.out.println(e.getMessage()); // Maneja la excepción de saldo insuficiente
         }
+
+        return false;
     }
+
 
     // Métodos privados: Validaciones
     private boolean validarTexto(String texto, String campo) {
