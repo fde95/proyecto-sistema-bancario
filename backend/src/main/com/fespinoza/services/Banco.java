@@ -1,5 +1,7 @@
 package main.com.fespinoza.services;
 
+import main.com.fespinoza.exceptions.UsuarioNoEncontradoException;
+import main.com.fespinoza.exceptions.CuentaNoEncontradaException;
 import main.com.fespinoza.models.CuentaBancaria;
 import main.com.fespinoza.models.Usuario;
 
@@ -11,7 +13,6 @@ import java.util.regex.Pattern;
  * Clase que gestiona las operaciones bancarias.
  * Maneja usuarios y cuentas bancarias.
  */
-
 public class Banco {
 
     private Map<String, Usuario> usuarios;
@@ -45,20 +46,25 @@ public class Banco {
             return false;
         }
 
-        Usuario usuario = buscarUsuarioInterno(email);
-        if (usuario == null) return false;
+        try {
+            Usuario usuario = buscarUsuarioInterno(email);
 
-        if (cuentas.containsKey(numeroCuenta)) {
-            System.out.println("Error: La cuenta con número " + numeroCuenta + " ya existe.");
+            if (cuentas.containsKey(numeroCuenta)) {
+                System.out.println("Error: La cuenta con número " + numeroCuenta + " ya existe.");
+                return false;
+            }
+
+            CuentaBancaria cuenta = new CuentaBancaria(numeroCuenta, usuario.getNombre(), saldoInicial);
+            cuentas.put(numeroCuenta, cuenta);
+            usuario.agregarCuenta(cuenta);
+
+            System.out.println("Cuenta " + numeroCuenta + " creada con éxito para " + usuario.getNombre());
+            return true;
+
+        } catch (UsuarioNoEncontradoException e) {
+            System.out.println(e.getMessage());
             return false;
         }
-
-        CuentaBancaria cuenta = new CuentaBancaria(numeroCuenta, usuario.getNombre(), saldoInicial);
-        cuentas.put(numeroCuenta, cuenta);
-        usuario.agregarCuenta(cuenta);
-
-        System.out.println("Cuenta " + numeroCuenta + " creada con éxito para " + usuario.getNombre());
-        return true;
     }
 
     public boolean transferir(String numeroCuentaOrigen, String numeroCuentaDestino, double monto) {
@@ -67,19 +73,23 @@ public class Banco {
             return false;
         }
 
-        CuentaBancaria origen = buscarCuentaInterna(numeroCuentaOrigen);
-        CuentaBancaria destino = buscarCuentaInterna(numeroCuentaDestino);
+        try {
+            CuentaBancaria origen = buscarCuentaInterna(numeroCuentaOrigen);
+            CuentaBancaria destino = buscarCuentaInterna(numeroCuentaDestino);
 
-        if (origen == null || destino == null) return false;
+            if (origen.retirar(monto)) {
+                destino.depositar(monto);
+                System.out.println("Transferencia de $" + monto + " realizada con éxito.");
+                return true;
+            }
 
-        if (origen.retirar(monto)) {
-            destino.depositar(monto);
-            System.out.println("Transferencia de $" + monto + " realizada con éxito.");
-            return true;
+            System.out.println("Error: Transferencia fallida. Fondos insuficientes.");
+            return false;
+
+        } catch (CuentaNoEncontradaException e) {
+            System.out.println(e.getMessage());
+            return false;
         }
-
-        System.out.println("Error: Transferencia fallida. Fondos insuficientes.");
-        return false;
     }
 
     // Métodos privados: Validaciones
@@ -114,20 +124,28 @@ public class Banco {
         return true;
     }
 
-    // Métodos auxiliares de búsqueda (refactorizados previamente)
-    private Usuario buscarUsuarioInterno(String email) {
+    // Métodos auxiliares de búsqueda (ahora lanzan excepciones)
+    private Usuario buscarUsuarioInterno(String email) throws UsuarioNoEncontradoException {
         Usuario usuario = usuarios.get(email);
         if (usuario == null) {
-            System.out.println("Error: Usuario con email " + email + " no encontrado.");
+            throw new UsuarioNoEncontradoException(email);
         }
         return usuario;
     }
 
-    private CuentaBancaria buscarCuentaInterna(String numeroCuenta) {
+    private CuentaBancaria buscarCuentaInterna(String numeroCuenta) throws CuentaNoEncontradaException {
         CuentaBancaria cuenta = cuentas.get(numeroCuenta);
         if (cuenta == null) {
-            System.out.println("Error: Cuenta con número " + numeroCuenta + " no encontrada.");
+            throw new CuentaNoEncontradaException(numeroCuenta);
         }
         return cuenta;
+    }
+
+    public CuentaBancaria buscarCuenta(String numeroCuenta) throws CuentaNoEncontradaException {
+        return buscarCuentaInterna(numeroCuenta);
+    }
+
+    public Usuario buscarUsuario(String email) throws UsuarioNoEncontradoException {
+        return buscarUsuarioInterno(email);
     }
 }
