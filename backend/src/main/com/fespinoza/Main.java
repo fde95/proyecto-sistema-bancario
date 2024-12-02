@@ -1,7 +1,11 @@
 package main.com.fespinoza;
 
 import main.com.fespinoza.exceptions.CuentaNoEncontradaException;
+import main.com.fespinoza.exceptions.SaldoInsuficienteException;
+import main.com.fespinoza.models.Transaccion;
 import main.com.fespinoza.services.Banco;
+
+import java.time.LocalDateTime;
 
 public class Main {
     public static void main(String[] args) {
@@ -14,18 +18,33 @@ public class Main {
         banco.crearUsuario("Juan", "Pérez", "juan@gmail.com", "54321");
         banco.crearCuenta("juan@gmail.com", "002", 500.0);
 
-        // Realizar transferencia
-        banco.transferir("001", "002", 300.0);
-
-        // Manejar la excepción en las búsquedas de cuentas
         try {
-            System.out.println("\nHistorial de la cuenta de Felipe:");
+            // Realizar operaciones
+            banco.transferir("001", "002", 300.0);
+            banco.buscarCuenta("001").depositar(200.0);
+            banco.buscarCuenta("001").retirar(100.0);
+
+            // Mostrar todas las transacciones
+            System.out.println("\n=== Todas las transacciones ===");
             banco.buscarCuenta("001").mostrarHistorial();
 
-            System.out.println("\nHistorial de la cuenta de Juan:");
-            banco.buscarCuenta("002").mostrarHistorial();
-        } catch (CuentaNoEncontradaException e) {
-            System.out.println(e.getMessage()); // Muestra el error si una cuenta no es encontrada
+            // Filtrar por tipo: TRANSFERENCIA
+            System.out.println("\n=== Filtrar por tipo: TRANSFERENCIA ===");
+            banco.buscarCuenta("001").mostrarTransaccionesFiltradas(
+                    banco.buscarCuenta("001").filtrarPorTipo(Transaccion.Tipo.TRANSFERENCIA)
+            );
+
+            // Filtrar por rango de fechas (últimas 24 horas)
+            LocalDateTime hace24Horas = LocalDateTime.now().minusHours(24);
+            LocalDateTime ahora = LocalDateTime.now();
+
+            System.out.println("\n=== Filtrar por rango de fechas (últimas 24 horas) ===");
+            banco.buscarCuenta("001").mostrarTransaccionesFiltradas(
+                    banco.buscarCuenta("001").filtrarPorRangoDeFechas(hace24Horas, ahora)
+            );
+
+        } catch (CuentaNoEncontradaException | SaldoInsuficienteException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

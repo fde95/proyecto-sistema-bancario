@@ -3,11 +3,12 @@ package main.com.fespinoza.models;
 import main.com.fespinoza.exceptions.SaldoInsuficienteException;
 import main.com.fespinoza.interfaces.IEntidadBancaria;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Clase querepresenta una cuenta bancaria en el sistema.
+ * Clase que representa una cuenta bancaria en el sistema.
  * Implementa la interfaz IEntidadBancaria.
  */
 
@@ -27,7 +28,7 @@ public class CuentaBancaria implements IEntidadBancaria {
 
     @Override
     public String getIdentificador() {
-        return numeroCuenta; //El identificador único para cuentas es el número de cuenta.
+        return numeroCuenta; // El identificador único para cuentas es el número de cuenta.
     }
 
     @Override
@@ -42,9 +43,9 @@ public class CuentaBancaria implements IEntidadBancaria {
     public void depositar(Double cantidad) {
         if (cantidad > 0) {
             saldo += cantidad;
-            System.out.println("Deposito realizado: $" + cantidad);
+            System.out.println("Depósito realizado: $" + cantidad);
             System.out.println("El saldo de su cuenta es de: $" + saldo + "\n");
-            agregarTransaccion(new Transaccion(Transaccion.Tipo.DEPOSITO, cantidad,"Depósito en cuenta"));
+            agregarTransaccion(new Transaccion(Transaccion.Tipo.DEPOSITO, cantidad, "Depósito en cuenta."));
         } else {
             System.out.println("Cantidad inválida para depositar.");
         }
@@ -71,7 +72,53 @@ public class CuentaBancaria implements IEntidadBancaria {
         System.out.println("=======================================\n");
     }
 
-    //Getter and Setter
+    /**
+     * Filtrar las transacciones por tipo.
+     *
+     * @param tipo El tipo de transacción a filtrar (DEPOSITO, RETIRO, TRANSFERENCIA).
+     * @return Una lista con las transacciones del tipo especificado.
+     */
+    public List<Transaccion> filtrarPorTipo(Transaccion.Tipo tipo) {
+        List<Transaccion> resultado = new ArrayList<>();
+        for (Transaccion transaccion : historial) {
+            if (transaccion.getTipo() == tipo) {
+                resultado.add(transaccion);
+            }
+        }
+        return resultado;
+    }
+
+    /**
+     * Filtrar las transacciones dentro de un rango de fechas.
+     *
+     * @param inicio Fecha de inicio del rango.
+     * @param fin    Fecha de fin del rango.
+     * @return Una lista con las transacciones dentro del rango de fechas.
+     */
+    public List<Transaccion> filtrarPorRangoDeFechas(LocalDateTime inicio, LocalDateTime fin) {
+        List<Transaccion> resultado = new ArrayList<>();
+        for (Transaccion transaccion : historial) {
+            if (transaccion.getFecha().isAfter(inicio) && transaccion.getFecha().isBefore(fin)) {
+                resultado.add(transaccion);
+            }
+        }
+        return resultado;
+    }
+
+    /**
+     * Mostrar una lista de transacciones filtradas.
+     *
+     * @param transacciones Lista de transacciones a mostrar.
+     */
+    public void mostrarTransaccionesFiltradas(List<Transaccion> transacciones) {
+        System.out.println("=== Transacciones filtradas para la cuenta " + numeroCuenta + " ===");
+        for (Transaccion transaccion : transacciones) {
+            System.out.println(transaccion.getDetalle());
+        }
+        System.out.println("=======================================");
+    }
+
+    // Getters y setters
     public String getNumeroCuenta() {
         return numeroCuenta;
     }
