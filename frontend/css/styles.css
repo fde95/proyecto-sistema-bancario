@@ -1,0 +1,34 @@
+#filters {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#transactionTable {
+    margin-top: 30px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+#filterBtn {
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+#filterBtn:hover {
+    background-color: #28a745;
+    color: white;
+}
+
+header {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+footer {
+    background-color: #212529;
+    color: #adb5bd;
+}

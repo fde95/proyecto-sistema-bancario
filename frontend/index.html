@@ -10,12 +10,17 @@
     <title>Sistema Bancario</title>
 </head>
 <body>
-    <div class="container my-5">
-        <h1 class="text-center">Historial de Transacciones</h1>
-        <hr>
-        <div id="filters" class="mb-4">
-            <h5>Filtros:</h5>
-            <div class="row">
+    <header class="bg-primary text-white py-3">
+        <div class="container text-center">
+            <h1>Sistema Bancario</h1>
+            <p>Consulta y gestiona tus transacciones</p>
+        </div>
+    </header>
+
+    <main class="container my-5">
+        <section id="filters" class="mb-4">
+            <h2>Filtros</h2>
+            <div class="row g-3">
                 <div class="col-md-6">
                     <label for="transactionType" class="form-label">Tipo de Transacción:</label>
                     <select id="transactionType" class="form-select">
@@ -27,16 +32,17 @@
                 </div>
                 <div class="col-md-6">
                     <label for="dateRange" class="form-label">Rango de Fechas:</label>
-                    <input type="date" id="startDate" class="form-control mb-2" placeholder="Fecha inicio">
-                    <input type="date" id="endDate" class="form-control" placeholder="Fecha fin">
+                    <input type="date" id="startDate" class="form-control" placeholder="Fecha inicio">
+                    <input type="date" id="endDate" class="form-control mt-2" placeholder="Fecha fin">
                 </div>
             </div>
-            <button id="filterBtn" class="btn btn-primary mt-3">Aplicar Filtros</button>
-        </div>
-        <div id="transactionTable">
-            <h5>Resultados:</h5>
-            <table class="table table-striped">
-                <thead>
+            <button id="filterBtn" class="btn btn-success mt-4 w-100">Aplicar Filtros</button>
+        </section>
+
+        <section id="transactionTable">
+            <h2>Historial de Transacciones</h2>
+            <table class="table table-striped table-hover table-bordered">
+                <thead class="table-dark">
                     <tr>
                         <th>Fecha</th>
                         <th>Tipo</th>
@@ -45,10 +51,15 @@
                     </tr>
                 </thead>
                 <tbody id="transactionList">
+                    <!-- Transacciones se insertarán dinámicamente aquí -->
                 </tbody>
             </table>
-        </div>
-    </div>
+        </section>
+    </main>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2024 Sistema Bancario. Todos los derechos reservados.</p>
+    </footer>
 
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
